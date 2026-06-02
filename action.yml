@@ -1,6 +1,10 @@
 name: "[ACTION] Auto Release"
 description: "A composite action to handle auto releases"
-# https://github.com/godners-code/auto-release/action.yml
+author: "Godners Ren"
+
+branding:
+  icon: 'package'
+  color: 'red'
 
 inputs:
   GITHUB_TOKEN:
