@@ -24,7 +24,7 @@ permissions:
 ```yaml
     steps:
       - name: "[ACTION] Auto Release"
-      - uses:  Godners-Code/auto-release-action@1.1.0
+      - uses:  Godners-Code/auto-release-action@1.2.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
