@@ -22,40 +22,28 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: "[STEP] Validate Token Inputed via Command"
+    - name: "[STEP] Validate Token Inputed via Bash"
       id: Validate
       shell: bash
       run: bash ${{ github.action_path }}/validate.bash
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
-      # run: |
-      #   echo "[STEP] Validate Token Inputed via Command $(date '+%F %T') (UTC)"
-      #   if [ -z "${{ inputs.GITHUB_TOKEN }}" ]
-      #   then
-      #     TIME="$(date '+%F %T') (UTC)"
-      #     TITLE="Auto Release"
-      #     MESSAGE="GITHUB_TOKEN is missing or empty. Workflow terminated."
-      #     SUMMARY="[${TITLE} ${TIME}: ${MESSAGE}]"
-      #     echo "${SUMMARY}" >> $GITHUB_STEP_SUMMARY
-      #     echo "${SUMMARY}"
-      #     echo "summary=${SUMMARY}" >> $GITHUB_OUTPUT
-      #     exit 1
-      #   fi
-        
+
     - name: "[STEP] Check if Checkout via Command"
       id: checked-out
       shell: bash
-      run: |
-        echo "[STEP] Check if Checkout via Command"
-        if git rev-parse --is-inside-work-tree >/dev/null 2>&1
-        then
-          echo "checked_out=true" >> $GITHUB_OUTPUT
-          echo "Checkout Detected."
-        else
-          echo "checked_out=false" >> $GITHUB_OUTPUT
-          echo "No Checkout Detected."
-          echo "[STEP] Run Checkout Repository via Action"
-        fi
+      run: bash ${{ github.action_path }}/checked-out.bash
+      # run: |
+      #   echo "[STEP] Check if Checkout via Command"
+      #   if git rev-parse --is-inside-work-tree >/dev/null 2>&1
+      #   then
+      #     echo "checked_out=true" >> $GITHUB_OUTPUT
+      #     echo "Checkout Detected."
+      #   else
+      #     echo "checked_out=false" >> $GITHUB_OUTPUT
+      #     echo "No Checkout Detected."
+      #     echo "[STEP] Run Checkout Repository via Action"
+      #   fi
         
     - name: "[STEP] Run Checkout Repository via Action"
       if: steps.checked-out.outputs.checked_out == 'false'
