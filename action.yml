@@ -130,7 +130,7 @@ runs:
         tag_name: ${{ steps.Worker-Info.outputs.tag }}
         name: ${{ steps.Worker-Info.outputs.tag }}
         body: |
-          - TAG: ${{ steps.Worker-Info.outputs.tag }}
+          - TAG: ${{ steps.Worker-Info.outputs.release_tag }}
           - TIME: ${{ steps.Worker-Info.outputs.time }}
           - NOTE: This Release Created by Workflow [Auto-Release]
           - URL: <https://github.com/marketplace/actions/action-auto-release>
