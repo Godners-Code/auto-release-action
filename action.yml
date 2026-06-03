@@ -70,10 +70,6 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         RELEASE_TAG: ${{ steps.worker-info.outputs.release_tag }}
-      # run: |
-      #   echo "[STEP] Remove Existent Release via Command $(date '+%F %T') (UTC)"
-      #   gh release delete ${{ steps.worker-info.outputs.tag }} --yes --cleanup-tag 2>/dev/null || echo ""
-      #   echo "[STEP] Create New Release via Action $(date '+%F %T') (UTC)"
       
     - name: "[STEP] Create New Release via SoftProps Action"
       id: Create
@@ -95,12 +91,3 @@ runs:
       if: steps.worker-check.outputs.has_changes == 'true'
       shell: bash
       run: bash ${{ github.action_path }}/summary-has-changes.bash
-      # run: |
-      #   TIME="$(date '+%F %T') (UTC)"
-      #   echo "[STEP] Print Summary (Has Changes) via Command ${TIME}"
-      #   TITLE="Auto Release"
-      #   MESSAGE="Tag is <${{ steps.worker-info.outputs.tag }}>, Time is <${{ steps.worker-info.outputs.time }}>."
-      #   SUMMARY="[${TITLE}] ${TIME}: ${MESSAGE}"
-      #   echo "${SUMMARY}" >> $GITHUB_STEP_SUMMARY
-      #   echo "${SUMMARY}"
-      #   echo "summary=${SUMMARY}" >> $GITHUB_OUTPUT
