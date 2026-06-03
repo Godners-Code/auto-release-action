@@ -10,10 +10,10 @@ inputs:
   GITHUB_TOKEN:
     description: "The GitHub Token from the calling repository"
     required: true
-  # Checkout:
-  #   description: Checkout Repository by This Action
-  #   required: false
-  #   defalut: true
+  Checkout:
+    description: Checkout Repository by This Action
+    required: false
+    defalut: true
     
 outputs:
   has_changes:
@@ -26,10 +26,11 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: "[STEP] Check if Checkout has been Executed"
+    - name: "[STEP] Check if Checkout via Command"
       id: checked-out
       shell: bash
       run: |
+        echo "[STEP] Check if Checkout via Command"
         if git rev-parse --is-inside-work-tree >/dev/null 2>&1
         then
           echo "checked_out=true" >> $GITHUB_OUTPUT
