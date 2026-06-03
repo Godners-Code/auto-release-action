@@ -69,6 +69,7 @@ runs:
       run: bash ${{ github.action_path }}/remove.bash
       env:
         GH_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        RELEASE_TAG: ${{ steps.worker-info.outputs.release_tag }}
       # run: |
       #   echo "[STEP] Remove Existent Release via Command $(date '+%F %T') (UTC)"
       #   gh release delete ${{ steps.worker-info.outputs.tag }} --yes --cleanup-tag 2>/dev/null || echo ""
