@@ -10,10 +10,6 @@ inputs:
   GITHUB_TOKEN:
     description: "The GitHub Token from the calling repository"
     required: true
-  Checkout:
-    description: Checkout Repository by This Action
-    required: false
-    defalut: true
     
 outputs:
   has_changes:
@@ -22,7 +18,7 @@ outputs:
   release_tag:
     description: "The tag generated for the release"
     value: ${{ steps.Worker-Info.outputs.release_tag }}
-
+    
 runs:
   using: "composite"
   steps:
@@ -38,10 +34,10 @@ runs:
         else
           echo "checked_out=false" >> $GITHUB_OUTPUT
           echo "No Checkout Detected."
+          echo "[STEP] Run Checkout Repository via Action"
         fi
-      
+        
     - name: "[STEP] Run Checkout Repository via Action"
-      # if: inputs.Checkout == 'true'
       if: steps.checked-out.outputs.checked_out == 'false'
       id: Checkout
       uses: actions/checkout@main
@@ -57,7 +53,7 @@ runs:
         if [ -z "${{ inputs.GITHUB_TOKEN }}" ]
         then
           TIME="$(date '+%F %T') (UTC)"
-          TITLE="Periodic Release"
+          TITLE="Auto Release"
           MESSAGE="GITHUB_TOKEN is missing or empty. Workflow terminated."
           SUMMARY="[${TITLE} ${TIME}: ${MESSAGE}]"
           echo "${SUMMARY}" >> $GITHUB_STEP_SUMMARY
@@ -96,7 +92,7 @@ runs:
       run: |
         TIME="$(date '+%F %T') (UTC)"
         echo "[STEP] Print Summary (NO Changes) via Command ${TIME}"
-        TITLE="Periodic Release"
+        TITLE="Auto Release"
         MESSAGE="Relasee canceled because No Changes"
         SUMMARY="[${TITLE} ${TIME}: ${MESSAGE}]"
         echo "${SUMMARY}" >> $GITHUB_STEP_SUMMARY
@@ -138,8 +134,8 @@ runs:
         body: |
           - TAG: ${{ steps.Worker-Info.outputs.tag }}
           - TIME: ${{ steps.Worker-Info.outputs.time }}
-          - NOTE: This Release Created by Workflow [Periodic-Release]
-          - URL: <https://github.com/godners/Shared_Actions/periodic-release/action.yml>
+          - NOTE: This Release Created by Workflow [Auto-Release]
+          - URL: https://github.com/marketplace/actions/action-auto-release>
         draft: false
         prerelease: false
 
@@ -150,11 +146,9 @@ runs:
       run: |
         TIME="$(date '+%F %T') (UTC)"
         echo "[STEP] Print Summary (Has Changes) via Command ${TIME}"
-        TITLE="Periodic Release"
+        TITLE="Auto Release"
         MESSAGE="Tag is <${{ steps.Worker-Info.outputs.tag }}>, Time is <${{ steps.Worker-Info.outputs.time }}>."
         SUMMARY="[${TITLE}] ${TIME}: ${MESSAGE}"
         echo "${SUMMARY}" >> $GITHUB_STEP_SUMMARY
         echo "${SUMMARY}"
         echo "summary=${SUMMARY}" >> $GITHUB_OUTPUT
-
-
