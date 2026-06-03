@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "[STEP] [$(date '+%F %T') (UTC)]Check if Checkout via Bash Script"
+echo "[STEP] [$(date '+%F %T') (UTC)] Check if Checkout via Bash Script"
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1
 then
     echo "checked_out=true" >> $GITHUB_OUTPUT
