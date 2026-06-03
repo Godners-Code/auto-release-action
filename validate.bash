@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "[STEP] Validate Token Inputed via Command $(date '+%F %T') (UTC)"
+echo "[STEP] [$(date '+%F %T') (UTC)] Validate Token Inputed via Bash Script"
 if [ -z "${GITHUB_TOKEN}" ]
 then
     TIME="$(date '+%F %T') (UTC)"
