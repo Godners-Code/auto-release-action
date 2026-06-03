@@ -14,7 +14,7 @@ inputs:
 outputs:
   has_changes:
     description: "Whether there are new changes to release"
-    value: ${{ steps.Worker-Check.outputs.has_changes }}
+    value: ${{ steps.worker-check.outputs.has_changes }}
   release_tag:
     description: "The tag generated for the release"
     value: ${{ steps.Worker-Info.outputs.release_tag }}
@@ -22,19 +22,19 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: "[STEP] Validate Token Inputed via Bash"
-      id: Validate
+    - name: "[STEP] Validate Token Inputed via Bash Script"
+      id: validate
       shell: bash
       run: bash ${{ github.action_path }}/validate.bash
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
 
-    - name: "[STEP] Check if Checkout via Command"
+    - name: "[STEP] Check if Checkout via Bash Script"
       id: checked-out
       shell: bash
       run: bash ${{ github.action_path }}/checked-out.bash
       # run: |
-      #   echo "[STEP] Check if Checkout via Command"
+      #   echo "[STEP] Check if Checkout via Bash Script"
       #   if git rev-parse --is-inside-work-tree >/dev/null 2>&1
       #   then
       #     echo "checked_out=true" >> $GITHUB_OUTPUT
@@ -45,7 +45,7 @@ runs:
       #     echo "[STEP] Run Checkout Repository via Action"
       #   fi
         
-    - name: "[STEP] Run Checkout Repository via Action"
+    - name: "[STEP] Run Checkout Repository via GitHub Action"
       if: steps.checked-out.outputs.checked_out == 'false'
       id: Checkout
       uses: actions/checkout@main
@@ -53,32 +53,33 @@ runs:
         fetch-depth: 0
         token: ${{ inputs.GITHUB_TOKEN }}
 
-    - name: "[STEP] Run Worker (Check) via Command"
-      id: Worker-Check
+    - name: "[STEP] Worker (Check) via Bash Script"
+      id: worker-check
       shell: bash
+      run: bash ${{ github.action_path }}/worker-check.bash
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         GH_TOKEN: ${{ inputs.GITHUB_TOKEN }}
-      run: |
-        echo "[STEP] Run Worker (Check) via Command $(date '+%F %T') (UTC)"
-        LATEST_TAG=$(gh release list --limit 1 --json tagName -jq '.[0].tagName' 2>/dev/null || echo "")
-        if [ -z "$LATEST_TAG" ]
-        then
-          echo "has_changes=true" >> $GITHUB_OUTPUT
-          exit 0
-        fi
-        LASTEST_SHA=$(git rev-parse "$LATEST_TAG^{commit}" 2>/dev/null || echo "")
-        CURRENT_SHA=$(git rev-parse HEAD)
-        if [ "$LASTEST_SHA" = "$CURRENT_SHA" ] 
-        then
-          echo "has_changes=false" >> $GITHUB_OUTPUT
-        else
-          echo "has_changes=true"  >> $GITHUB_OUTPUT
-        fi
+      # run: |
+      #   echo "[STEP] Run Worker (Check) via Command $(date '+%F %T') (UTC)"
+      #   LATEST_TAG=$(gh release list --limit 1 --json tagName -jq '.[0].tagName' 2>/dev/null || echo "")
+      #   if [ -z "$LATEST_TAG" ]
+      #   then
+      #     echo "has_changes=true" >> $GITHUB_OUTPUT
+      #     exit 0
+      #   fi
+      #   LASTEST_SHA=$(git rev-parse "$LATEST_TAG^{commit}" 2>/dev/null || echo "")
+      #   CURRENT_SHA=$(git rev-parse HEAD)
+      #   if [ "$LASTEST_SHA" = "$CURRENT_SHA" ] 
+      #   then
+      #     echo "has_changes=false" >> $GITHUB_OUTPUT
+      #   else
+      #     echo "has_changes=true"  >> $GITHUB_OUTPUT
+      #   fi
     
     - name: "[STEP] Print Summary (NO Changes) via Command"
       id: Summary-NoChanges
-      if: steps.Worker-Check.outputs.has_changes == 'false'
+      if: steps.worker-check.outputs.has_changes == 'false'
       shell: bash
       run: |
         TIME="$(date '+%F %T') (UTC)"
@@ -92,7 +93,7 @@ runs:
     
     - name: "[STEP] Run Worker (Info) via Command"
       id: Worker-Info
-      if: steps.Worker-Check.outputs.has_changes == 'true'
+      if: steps.worker-check.outputs.has_changes == 'true'
       shell: bash
       run: |
         echo "[STEP] Run Worker (Info) via Command $(date '+%F %T') (UTC)"
@@ -104,7 +105,7 @@ runs:
 
     - name: "[STEP] Remove Existent Release via Command"
       id: Remove
-      if: steps.Worker-Check.outputs.has_changes == 'true'
+      if: steps.worker-check.outputs.has_changes == 'true'
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.GITHUB_TOKEN }}
@@ -115,7 +116,7 @@ runs:
       
     - name: "[STEP] Create New Release via Action"
       id: Create
-      if: steps.Worker-Check.outputs.has_changes == 'true'
+      if: steps.worker-check.outputs.has_changes == 'true'
       uses: softprops/action-gh-release@master
       with:
         tag_name: ${{ steps.Worker-Info.outputs.release_tag }}
@@ -130,7 +131,7 @@ runs:
 
     - name: "[STEP] Print Summary (Has Changes) via Command"
       id: Summary-has_changes
-      if: steps.Worker-Check.outputs.has_changes == 'true'
+      if: steps.worker-check.outputs.has_changes == 'true'
       shell: bash
       run: |
         TIME="$(date '+%F %T') (UTC)"
