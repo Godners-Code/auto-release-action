@@ -23,7 +23,8 @@ permissions:
 
 ```yaml
     steps:
-      - uses: godners/Shared_actions/periodic-release@main
+      - name: "[ACTION] Auto Release"
+      - uses:  Godners-Code/auto-release-action@1.1.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
