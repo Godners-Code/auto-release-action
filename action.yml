@@ -1,10 +1,10 @@
 name: "[ACTION] Auto Release"
-description: "A composite action to handle auto releases"
+description: "Automatically create GitHub Release when new commits are detected. Ideal for daily snapshots and nightly builds."
 author: "Godners Ren"
 
 branding:
-  icon: 'package'
-  color: 'red'
+  icon: 'calendar'
+  color: 'blue'
 
 inputs:
   GITHUB_TOKEN:
