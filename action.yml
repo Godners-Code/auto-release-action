@@ -10,10 +10,10 @@ inputs:
   GITHUB_TOKEN:
     description: "The GitHub Token from the calling repository"
     required: true
-  Checkout:
-    description: Checkout Repository by This Action
-    required: false
-    defalut: true
+  # Checkout:
+  #   description: Checkout Repository by This Action
+  #   required: false
+  #   defalut: true
     
 outputs:
   has_changes:
@@ -26,8 +26,22 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: "[STEP] Check if Checkout has been Executed"
+      id: checked-out
+      shell: bash
+      run: |
+        if git rev-parse --is-inside-work-tree >/dev/null 2>&1
+        then
+          echo "checked_out=true" >> $GITHUB_OUTPUT
+          echo "Checkout Detected."
+        else
+          echo "checked_out=false" >> $GITHUB_OUTPUT
+          echo "No Checkout Detected."
+        fi
+      
     - name: "[STEP] Run Checkout Repository via Action"
-      if: inputs.Checkout == 'true'
+      # if: inputs.Checkout == 'true'
+      if: steps.checked-out.outputs.checked_out == 'false'
       id: Checkout
       uses: actions/checkout@main
       with:
