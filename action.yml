@@ -25,7 +25,7 @@ runs:
     - name: "[STEP] Validate Token Inputed via Command"
       id: Validate
       shell: bash
-      run: bash validate.bash
+      run: bash ${{ github.action_path }}/validate.bash
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       # run: |
