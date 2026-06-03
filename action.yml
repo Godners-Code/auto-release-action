@@ -22,6 +22,23 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: "[STEP] Validate Token Inputed via Command"
+      id: Validate
+      shell: bash
+      run: |
+        echo "[STEP] Validate Token Inputed via Command $(date '+%F %T') (UTC)"
+        if [ -z "${{ inputs.GITHUB_TOKEN }}" ]
+        then
+          TIME="$(date '+%F %T') (UTC)"
+          TITLE="Auto Release"
+          MESSAGE="GITHUB_TOKEN is missing or empty. Workflow terminated."
+          SUMMARY="[${TITLE} ${TIME}: ${MESSAGE}]"
+          echo "${SUMMARY}" >> $GITHUB_STEP_SUMMARY
+          echo "${SUMMARY}"
+          echo "summary=${SUMMARY}" >> $GITHUB_OUTPUT
+          exit 1
+        fi
+        
     - name: "[STEP] Check if Checkout via Command"
       id: checked-out
       shell: bash
@@ -45,23 +62,6 @@ runs:
         fetch-depth: 0
         token: ${{ inputs.GITHUB_TOKEN }}
 
-    - name: "[STEP] Validate Token Inputed via Command"
-      id: Validate
-      shell: bash
-      run: |
-        echo "[STEP] Validate Token Inputed via Command $(date '+%F %T') (UTC)"
-        if [ -z "${{ inputs.GITHUB_TOKEN }}" ]
-        then
-          TIME="$(date '+%F %T') (UTC)"
-          TITLE="Auto Release"
-          MESSAGE="GITHUB_TOKEN is missing or empty. Workflow terminated."
-          SUMMARY="[${TITLE} ${TIME}: ${MESSAGE}]"
-          echo "${SUMMARY}" >> $GITHUB_STEP_SUMMARY
-          echo "${SUMMARY}"
-          echo "summary=${SUMMARY}" >> $GITHUB_OUTPUT
-          exit 1
-        fi
-        
     - name: "[STEP] Run Worker (Check) via Command"
       id: Worker-Check
       shell: bash
@@ -93,7 +93,7 @@ runs:
         TIME="$(date '+%F %T') (UTC)"
         echo "[STEP] Print Summary (NO Changes) via Command ${TIME}"
         TITLE="Auto Release"
-        MESSAGE="Relasee canceled because No Changes"
+        MESSAGE="Release canceled because No Changes"
         SUMMARY="[${TITLE} ${TIME}: ${MESSAGE}]"
         echo "${SUMMARY}" >> $GITHUB_STEP_SUMMARY
         echo "${SUMMARY}"
@@ -107,7 +107,7 @@ runs:
         echo "[STEP] Run Worker (Info) via Command $(date '+%F %T') (UTC)"
         TODAY=$(date '+%Y.%m.%d')
         TAG="${TODAY}.auto"
-        echo "tag=${TAG}" >> $GITHUB_OUTPUT
+        echo "release_tag=${TAG}" >> $GITHUB_OUTPUT
         TIME="$(date '+%F %T') (UTC)"
         echo "time=${TIME}" >> $GITHUB_OUTPUT
 
@@ -126,8 +126,6 @@ runs:
       id: Create
       if: steps.Worker-Check.outputs.has_changes == 'true'
       uses: softprops/action-gh-release@master
-      env:
-        GITHUB_OUTPUT: ${{ inputs.GITHUB_OUTPUT }}
       with:
         tag_name: ${{ steps.Worker-Info.outputs.tag }}
         name: ${{ steps.Worker-Info.outputs.tag }}
@@ -135,7 +133,7 @@ runs:
           - TAG: ${{ steps.Worker-Info.outputs.tag }}
           - TIME: ${{ steps.Worker-Info.outputs.time }}
           - NOTE: This Release Created by Workflow [Auto-Release]
-          - URL: https://github.com/marketplace/actions/action-auto-release>
+          - URL: <https://github.com/marketplace/actions/action-auto-release>
         draft: false
         prerelease: false
 
