@@ -17,7 +17,7 @@ outputs:
     value: ${{ steps.worker-check.outputs.has_changes }}
   release_tag:
     description: "The tag generated for the release"
-    value: ${{ steps.Worker-Info.outputs.release_tag }}
+    value: ${{ steps.worker-info.outputs.release_tag }}
     
 runs:
   using: "composite"
@@ -33,17 +33,6 @@ runs:
       id: checked-out
       shell: bash
       run: bash ${{ github.action_path }}/checked-out.bash
-      # run: |
-      #   echo "[STEP] Check if Checkout via Bash Script"
-      #   if git rev-parse --is-inside-work-tree >/dev/null 2>&1
-      #   then
-      #     echo "checked_out=true" >> $GITHUB_OUTPUT
-      #     echo "Checkout Detected."
-      #   else
-      #     echo "checked_out=false" >> $GITHUB_OUTPUT
-      #     echo "No Checkout Detected."
-      #     echo "[STEP] Run Checkout Repository via Action"
-      #   fi
         
     - name: "[STEP] Run Checkout Repository via GitHub Action"
       if: steps.checked-out.outputs.checked_out == 'false'
@@ -60,48 +49,34 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
         GH_TOKEN: ${{ inputs.GITHUB_TOKEN }}
-      # run: |
-      #   echo "[STEP] Run Worker (Check) via Command $(date '+%F %T') (UTC)"
-      #   LATEST_TAG=$(gh release list --limit 1 --json tagName -jq '.[0].tagName' 2>/dev/null || echo "")
-      #   if [ -z "$LATEST_TAG" ]
-      #   then
-      #     echo "has_changes=true" >> $GITHUB_OUTPUT
-      #     exit 0
-      #   fi
-      #   LASTEST_SHA=$(git rev-parse "$LATEST_TAG^{commit}" 2>/dev/null || echo "")
-      #   CURRENT_SHA=$(git rev-parse HEAD)
-      #   if [ "$LASTEST_SHA" = "$CURRENT_SHA" ] 
-      #   then
-      #     echo "has_changes=false" >> $GITHUB_OUTPUT
-      #   else
-      #     echo "has_changes=true"  >> $GITHUB_OUTPUT
-      #   fi
     
-    - name: "[STEP] Print Summary (NO Changes) via Command"
-      id: Summary-NoChanges
+    - name: "[STEP] Print Summary (NO Changes) via Bash Script"
+      id: summary-no-changes
       if: steps.worker-check.outputs.has_changes == 'false'
       shell: bash
-      run: |
-        TIME="$(date '+%F %T') (UTC)"
-        echo "[STEP] Print Summary (NO Changes) via Command ${TIME}"
-        TITLE="Auto Release"
-        MESSAGE="Release canceled because No Changes"
-        SUMMARY="[${TITLE} ${TIME}: ${MESSAGE}]"
-        echo "${SUMMARY}" >> $GITHUB_STEP_SUMMARY
-        echo "${SUMMARY}"
-        echo "summary=${SUMMARY}" >> $GITHUB_OUTPUT
+      run: bash ${{ github.action_path }}/summary-no-changes.bash
+      # run: |
+      #   TIME="$(date '+%F %T') (UTC)"
+      #   echo "[STEP] Print Summary (NO Changes) via Command ${TIME}"
+      #   TITLE="Auto Release"
+      #   MESSAGE="Release canceled because No Changes"
+      #   SUMMARY="[${TITLE} ${TIME}: ${MESSAGE}]"
+      #   echo "${SUMMARY}" >> $GITHUB_STEP_SUMMARY
+      #   echo "${SUMMARY}"
+      #   echo "summary=${SUMMARY}" >> $GITHUB_OUTPUT
     
-    - name: "[STEP] Run Worker (Info) via Command"
-      id: Worker-Info
+    - name: "[STEP] Worker (Info) via Bash Script"
+      id: worker-info
       if: steps.worker-check.outputs.has_changes == 'true'
       shell: bash
-      run: |
-        echo "[STEP] Run Worker (Info) via Command $(date '+%F %T') (UTC)"
-        TODAY=$(date '+%Y.%m.%d')
-        TAG="${TODAY}.auto"
-        echo "release_tag=${TAG}" >> $GITHUB_OUTPUT
-        TIME="$(date '+%F %T') (UTC)"
-        echo "time=${TIME}" >> $GITHUB_OUTPUT
+      run: ${{ github.action_path }}/worker-info.bash
+      # run: |
+      #   echo "[STEP] Run Worker (Info) via Command $(date '+%F %T') (UTC)"
+      #   TODAY=$(date '+%Y.%m.%d')
+      #   TAG="${TODAY}.auto"
+      #   echo "release_tag=${TAG}" >> $GITHUB_OUTPUT
+      #   TIME="$(date '+%F %T') (UTC)"
+      #   echo "time=${TIME}" >> $GITHUB_OUTPUT
 
     - name: "[STEP] Remove Existent Release via Command"
       id: Remove
@@ -111,7 +86,7 @@ runs:
         GH_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       run: |
         echo "[STEP] Remove Existent Release via Command $(date '+%F %T') (UTC)"
-        gh release delete ${{ steps.Worker-Info.outputs.tag }} --yes --cleanup-tag 2>/dev/null || echo ""
+        gh release delete ${{ steps.worker-info.outputs.tag }} --yes --cleanup-tag 2>/dev/null || echo ""
         echo "[STEP] Create New Release via Action $(date '+%F %T') (UTC)"
       
     - name: "[STEP] Create New Release via Action"
@@ -119,11 +94,11 @@ runs:
       if: steps.worker-check.outputs.has_changes == 'true'
       uses: softprops/action-gh-release@master
       with:
-        tag_name: ${{ steps.Worker-Info.outputs.release_tag }}
-        name: ${{ steps.Worker-Info.outputs.release_tag }}
+        tag_name: ${{ steps.worker-info.outputs.release_tag }}
+        name: ${{ steps.worker-info.outputs.release_tag }}
         body: |
-          - TAG: ${{ steps.Worker-Info.outputs.release_tag }}
-          - TIME: ${{ steps.Worker-Info.outputs.time }}
+          - TAG: ${{ steps.worker-info.outputs.release_tag }}
+          - TIME: ${{ steps.worker-info.outputs.time }}
           - NOTE: This Release Created by Workflow [Auto-Release]
           - URL: <https://github.com/marketplace/actions/action-auto-release>
         draft: false
@@ -137,7 +112,7 @@ runs:
         TIME="$(date '+%F %T') (UTC)"
         echo "[STEP] Print Summary (Has Changes) via Command ${TIME}"
         TITLE="Auto Release"
-        MESSAGE="Tag is <${{ steps.Worker-Info.outputs.tag }}>, Time is <${{ steps.Worker-Info.outputs.time }}>."
+        MESSAGE="Tag is <${{ steps.worker-info.outputs.tag }}>, Time is <${{ steps.worker-info.outputs.time }}>."
         SUMMARY="[${TITLE}] ${TIME}: ${MESSAGE}"
         echo "${SUMMARY}" >> $GITHUB_STEP_SUMMARY
         echo "${SUMMARY}"
